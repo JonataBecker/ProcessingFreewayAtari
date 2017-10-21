@@ -1,0 +1,6 @@
+class Score {
+
+  void display() {
+  }
+
+}
