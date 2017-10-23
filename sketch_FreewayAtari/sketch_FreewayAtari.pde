@@ -1,9 +1,9 @@
 
-Scene scene = new Scene(800, 484);
-Player player = new Player(800, 484);
-
+Scene scene = new Scene(800, 480);
+Player player = new Player(800, 480);
+EnemiesController enemiesController = new EnemiesController();
 void setup() {  
-  size(800,484);
+  size(800,480);
   noStroke();
 }
 
@@ -16,7 +16,7 @@ void keyPressed() {
 void draw() { 
   scene.display();
   player.display();
-  
+  enemiesController.display();
   
   
 }
