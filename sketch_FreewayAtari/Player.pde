@@ -1,23 +1,21 @@
 class Player {
   
-  static final int STATUS_INIT_SW = 0;
   static final int STATUS_MOVE = 1;
   static final int STATUS_FINAL_SW = 2;
   
+  final Config config;
   int xSpeed = 5;
-  int ySpeed = 40;
+  int ySpeed = 10;
   int widthPlayer = 10;
-  int widthScene;
-  int heightScene;
-  int status = STATUS_INIT_SW;
+  int heightPlayer = 10;
+  int status = STATUS_MOVE;
   int y;
   int x;
   
-  Player(int widthScene, int heightScene) {
-    this.widthScene = widthScene;
-    this.heightScene = heightScene;
-    this.x = (widthScene / 2) - (widthPlayer / 2);
-    this.y = heightScene - 17;
+  Player(Config config) {
+    this.config = config;
+    this.x = (config.width / 2) - (widthPlayer / 2);
+    this.y = config.height - 17;
   }
 
   void move(int keyCode) {
@@ -25,20 +23,15 @@ class Player {
       return;
     }
     if (keyCode == UP) {
-      if (isInitialSideWalk()) {
-        y -= 32;
-        status = STATUS_MOVE;
-      } else {
-        y-=ySpeed;
-      }
-      if (y <= 60) {
+      y-=ySpeed;
+      if (y <= 40) {
         y += 7;
         status = STATUS_FINAL_SW;
       }
     }
     if (keyCode == DOWN) {
       int tmpY = y + ySpeed; 
-      if (tmpY < heightScene - 40) {
+      if (tmpY < config.height - 30) {
         y = tmpY;
       }
     }
@@ -50,14 +43,19 @@ class Player {
     }
     if (keyCode == RIGHT) {
       x+=xSpeed;
-      if (x > widthScene - widthPlayer) {
-        x = widthScene - widthPlayer;
+      if (x > config.width - widthPlayer) {
+        x = config.width - widthPlayer;
       }
     }
   }
+  
+  boolean isColided(Enemy enemy) {
+    return (x >= enemy.x && x <= enemy.x + enemy.width) && 
+          (y >= enemy.y && y <= enemy.y + enemy.height); 
+  }
 
-  boolean isInitialSideWalk() {
-    return status == STATUS_INIT_SW;
+  void moveBack() {
+    y += 25;
   }
 
   boolean isMoveing() {
@@ -71,7 +69,7 @@ class Player {
   void display() {
     noStroke();
     fill(#f00f00);
-    rect(x, y, widthPlayer, widthPlayer);
+    rect(x, y, widthPlayer, heightPlayer);
   }
 
 }

@@ -1,22 +1,18 @@
 
-Scene scene = new Scene(800, 480);
-Player player = new Player(800, 480);
-EnemiesController enemiesController = new EnemiesController();
+Config config = new Config(800, 480);
+Scene scene = new Scene(config);
+GameController gameController = new GameController();
+
 void setup() {  
   size(800,480);
   noStroke();
 }
 
-
 void keyPressed() {
-  player.move(keyCode);
-   
+  gameController.keyPressed(keyCode);   
 }
 
 void draw() { 
   scene.display();
-  player.display();
-  enemiesController.display();
-  
-  
+  gameController.display();
 }

@@ -2,12 +2,10 @@ class Scene {
  
   int roads = 5; 
   int roadHeight = 40;
-  int widthScene;
-  int heightScene;
+  final Config config;
   
-  Scene(int widthScene, int heightScene) {
-    this.widthScene = widthScene;
-    this.heightScene = heightScene;
+  Scene(Config config) {
+    this.config = config;
   }
   
   void display() {
@@ -15,7 +13,7 @@ class Scene {
     noStroke();
     // Score
     fill(#FFFFFF);
-    rect(0, 0, widthScene, 30);
+    rect(0, 0, config.width, 30);
     // Sidewalk
     drawSideWalk(30);
     // Fisrt roads
@@ -43,11 +41,11 @@ class Scene {
   void drawSideWalk(int posY) {
     noStroke();
     fill(#CCCCCC);
-    rect(0, posY, widthScene, 25);
+    rect(0, posY, config.width, 25);
   }
   
   void drawLineDashed(int posY) {
-    for (int i = 0; i < widthScene; i = i + 10) {
+    for (int i = 0; i < config.width; i = i + 10) {
       line(i, posY, i+5, posY);
     }
   }

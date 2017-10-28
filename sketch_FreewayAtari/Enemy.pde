@@ -1,12 +1,16 @@
 abstract class Enemy {
   
-  int enemyWidth = 10;
+  static final int DIRECTION_LEFT = 1;
+  static final int DIRECTION_RIGHT = 2;
+  
+  int width = 30;
+  int height = 20;
   int x = 0;
   int y = 0;
+  int direction;
   
-  Enemy(int x, int y) {
-    this.x = x;
-    this.y = y;
+  Enemy() {
+    this.direction = DIRECTION_RIGHT;
   }
  
   abstract void move();
@@ -14,7 +18,7 @@ abstract class Enemy {
   void display() {
     noStroke();
     fill(#f00f00);
-    rect(x, y, enemyWidth, enemyWidth);
+    rect(x, y, width, height);
   }
   
 
