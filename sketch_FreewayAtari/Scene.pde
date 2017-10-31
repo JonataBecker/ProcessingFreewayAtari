@@ -3,9 +3,11 @@ class Scene {
   int roads = 5; 
   int roadHeight = 40;
   final Config config;
+  final Score score;
   
   Scene(Config config) {
     this.config = config;
+    this.score = new Score(config);
   }
   
   void display() {
@@ -36,6 +38,8 @@ class Scene {
     // Sidewalk
     roadY += roadHeight;
     drawSideWalk(roadY);  
+    // Display score
+    score.display();
   } 
   
   void drawSideWalk(int posY) {

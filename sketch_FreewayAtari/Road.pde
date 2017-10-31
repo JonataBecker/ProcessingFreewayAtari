@@ -33,14 +33,16 @@ abstract class Road {
   protected abstract void add(Enemy enemy);
 
   void generate() {
-    add(new CarEnemy(4));
+    add(new CarEnemy(4 * config.difficult));
   }
 
   void display() {
     for (Enemy enemy : get()) {
-      enemy.move();  
+      if (!config.isWin()) {
+        enemy.move();  
+      }
       enemy.display();
-      if (enemy.x < 0 || enemy.x > 1000) {
+      if (enemy.x < 0 || enemy.x > config.width) {
           remove(enemy);
           generate();
       }

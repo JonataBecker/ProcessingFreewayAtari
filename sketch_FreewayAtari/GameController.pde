@@ -3,7 +3,8 @@ class GameController {
   final Player player;
   final ArrayList<Road> roads;
   final Colider colider = new Colider();
-  
+  final Congratulations congratulations = new Congratulations(config);
+    
   GameController() {
     this.player = new Player(config);
     this.roads = new ArrayList<Road>();
@@ -18,7 +19,14 @@ class GameController {
   }
   
   void keyPressed(int keyCode) {
+    if (config.isWin()) {
+      return;
+    }
     player.move(keyCode);
+    if (player.isFinalSideWalk()) {
+      config.addScore();
+      player.initialPosition();
+    }
   }
   
   void display() {
@@ -29,6 +37,9 @@ class GameController {
       player.moveBack();
     }
     player.display();
+    if (config.isWin()) {
+      congratulations.display();
+    }
   }
 
 
