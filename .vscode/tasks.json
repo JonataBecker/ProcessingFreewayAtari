@@ -1,0 +1,13 @@
+{
+    "version": "0.1.0",
+    "command": "/home/jonatabecker/Documents/processing-3.3.6/processing-java",
+    "isShellCommand": true,
+    "showOutput": "never",
+    "args": [
+        "--force",
+        "--sketch=${workspaceRoot}/sketch_FreewayAtari",
+        "--output=${workspaceRoot}/out",
+        "--platform=linux",
+        "--run"
+    ]
+}
