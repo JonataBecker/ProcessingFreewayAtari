@@ -5,8 +5,7 @@ class RightRoad extends Road {
   }
 
   void add(Enemy enemy) {
-    enemy.x = 0;
-    enemy.y = calcY();
+    enemy.y = calcY(enemy);
     enemy.direction = Enemy.DIRECTION_RIGHT;
     addEnemy(enemy);
   }

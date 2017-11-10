@@ -31,20 +31,11 @@ public void keyPressed() {
 public void draw() { 
   scene.display();
   gameController.display();
-
-  print("Ola");
 }
 class CarEnemy extends Enemy {
  
-  int enegy = 1;
-    
-  CarEnemy(int limit) {
-    super();
-    this.enegy = (int) random(limit) + 1;
-  }
-  
-  public void move() {
-    x += (direction == DIRECTION_LEFT ? enegy * -1 : enegy);
+  CarEnemy(int road) {
+    super(road, 2, 30, 20); 
   }
 
 }
@@ -61,6 +52,19 @@ class Colider {
     }
     return false;
   }
+
+  public boolean isColided(Enemy enemy, Road road) {
+    ArrayList<Enemy> enemies = road.get();
+    for (int i = 0; i < enemies.size(); i++) {
+      if (enemy.isColided(enemies.get(i)) && enemy != enemies.get(i)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  
+
 }
 class Config {
   
@@ -130,24 +134,37 @@ abstract class Enemy {
   static final int DIRECTION_LEFT = 1;
   static final int DIRECTION_RIGHT = 2;
   
-  int width = 30;
-  int height = 20;
+  int road;
+  int width;
+  int height;
   int x = 0;
   int y = 0;
   int direction;
-  
-  Enemy() {
+  int enegy = 1;
+
+  Enemy(int road, int enegy, int width, int height) {
     this.direction = DIRECTION_RIGHT;
+    this.enegy = enegy + (int) random(3);
+    this.width = width;
+    this.height = height;
   }
  
-  public abstract void move();
+  public void move() {
+    x += (direction == DIRECTION_LEFT ? enegy * -1 : enegy);
+  }
   
   public void display() {
     noStroke();
     fill(0xfff00f00);
     rect(x, y, width, height);
   }
-  
+
+  public boolean isColided(Enemy enemy) {
+    return ((x >= enemy.x && x <= enemy.x + enemy.width) ||
+          (x + width >= enemy.x && x + width <= enemy.x + enemy.width)) && 
+          ((y >= enemy.y && y <= enemy.y + enemy.height) ||
+          (y + height >= enemy.y && y + height <= enemy.y + enemy.height)); 
+  }
 
 }
 class GameController {
@@ -167,7 +184,8 @@ class GameController {
       }
       road.generate();      
       this.roads.add(road);      
-    } 
+    }
+    roads.get(0).add(new PoliceCarEnemy(0, roads));
   }
   
   public void keyPressed(int keyCode) {
@@ -194,7 +212,6 @@ class GameController {
     }
   }
 
-
 }
 class LeftRoad extends Road {
 
@@ -203,8 +220,10 @@ class LeftRoad extends Road {
   }
   
   public void add(Enemy enemy) {
-    enemy.x = config.width;
-    enemy.y = calcY();
+    if (enemy.x == 0) {
+      enemy.x = config.width;
+    }
+    enemy.y = calcY(enemy);
     enemy.direction = Enemy.DIRECTION_LEFT;
     addEnemy(enemy);
   }
@@ -303,6 +322,39 @@ class Player {
   }
 
 }
+class PoliceCarEnemy extends Enemy {
+ 
+  final ArrayList<Road> roads;
+
+  Colider colider = new Colider();
+
+  PoliceCarEnemy(int road, ArrayList<Road> roads) {
+    super(road, 5, 30, 20); 
+    this.roads = roads;
+  }
+
+  public void move() {
+    x += (direction == DIRECTION_LEFT ? enegy * -1 : enegy);
+    if (colider.isColided(this, roads.get(road))) {
+      roads.get(road).remove(this);
+      road++;
+      roads.get(road).add(this);
+      if (colider.isColided(this, roads.get(road))) {
+        roads.get(road).remove(this);
+        road--;
+        roads.get(road).add(this);
+        x += (direction == DIRECTION_LEFT ? enegy * -1 : enegy) * -1;
+      }
+    }
+  }
+
+  public void display() {
+    noStroke();
+    fill(0xff0366d6);
+    rect(x, y, width, height);
+  }
+
+}
 class RightRoad extends Road {
 
   RightRoad(int id, Config config) {
@@ -310,8 +362,7 @@ class RightRoad extends Road {
   }
 
   public void add(Enemy enemy) {
-    enemy.x = 0;
-    enemy.y = calcY();
+    enemy.y = calcY(enemy);
     enemy.direction = Enemy.DIRECTION_RIGHT;
     addEnemy(enemy);
   }
@@ -334,8 +385,8 @@ abstract class Road {
      this.enemies.add(enemy);
   }
 
-  protected int calcY() {
-    return id * 40 + 65;
+  protected int calcY(Enemy enemy) {
+    return id * 40 + (55 + (40 - enemy.height) / 2);
   }
 
   public void remove(Enemy enemy) {
@@ -353,7 +404,7 @@ abstract class Road {
   protected abstract void add(Enemy enemy);
 
   public void generate() {
-    add(new CarEnemy(4 * config.difficult));
+    add(new CarEnemy(id));
   }
 
   public void display() {
@@ -363,8 +414,10 @@ abstract class Road {
       }
       enemy.display();
       if (enemy.x < 0 || enemy.x > config.width) {
-          remove(enemy);
+        remove(enemy);
+        if (!(enemy instanceof PoliceCarEnemy)) {
           generate();
+        }
       }
     }  
   }
@@ -440,6 +493,13 @@ class Score {
     fill(0xff000000);
     text("Score: " + config.score, 10, 20);
     text("Difficult: " + config.difficult, config.width - 80, 20);
+  }
+
+}
+class TruckEnemy extends Enemy {
+ 
+  TruckEnemy(int road) {
+    super(road, 2, 80, 30); 
   }
 
 }

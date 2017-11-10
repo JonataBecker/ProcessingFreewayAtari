@@ -15,7 +15,8 @@ class GameController {
       }
       road.generate();      
       this.roads.add(road);      
-    } 
+    }
+    roads.get(0).add(new PoliceCarEnemy(0, roads));
   }
   
   void keyPressed(int keyCode) {
@@ -41,6 +42,5 @@ class GameController {
       congratulations.display();
     }
   }
-
 
 }

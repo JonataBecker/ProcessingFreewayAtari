@@ -14,8 +14,8 @@ abstract class Road {
      this.enemies.add(enemy);
   }
 
-  protected int calcY() {
-    return id * 40 + 65;
+  protected int calcY(Enemy enemy) {
+    return id * 40 + (55 + (40 - enemy.height) / 2);
   }
 
   void remove(Enemy enemy) {
@@ -33,7 +33,7 @@ abstract class Road {
   protected abstract void add(Enemy enemy);
 
   void generate() {
-    add(new CarEnemy(4 * config.difficult));
+    add(new CarEnemy(id));
   }
 
   void display() {
@@ -43,8 +43,10 @@ abstract class Road {
       }
       enemy.display();
       if (enemy.x < 0 || enemy.x > config.width) {
-          remove(enemy);
+        remove(enemy);
+        if (!(enemy instanceof PoliceCarEnemy)) {
           generate();
+        }
       }
     }  
   }
