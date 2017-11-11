@@ -4,28 +4,42 @@ abstract class Enemy {
   static final int DIRECTION_RIGHT = 2;
   
   int road;
+  final ArrayList<Road> roads;
   int width;
   int height;
-  int x = 0;
-  int y = 0;
+  Integer x;
+  Integer y = 0;
   int direction;
-  int enegy = 1;
+  int energy = 1;
+  int usedEnergy = 1;
+  Colider colider = new Colider();
 
-  Enemy(int road, int enegy, int width, int height) {
+  Enemy(int road, ArrayList<Road> roads, int energy, int width, int height) {
+    this.road = road;
     this.direction = DIRECTION_RIGHT;
-    this.enegy = enegy + (int) random(3);
+    this.energy = energy + (int) random(3);
     this.width = width;
     this.height = height;
+    this.roads = roads;
   }
  
   void move() {
-    x += (direction == DIRECTION_LEFT ? enegy * -1 : enegy);
+    int tmp = x;
+    x += (direction == DIRECTION_LEFT ? 10 * -1 : 10);
+    usedEnergy = energy;
+    int enemyEnergy = colider.isColided(this, roads.get(road));
+    if (enemyEnergy >= 0) {
+      usedEnergy = enemyEnergy;
+    }
+    x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
   }
   
   void display() {
     noStroke();
     fill(#f00f00);
     rect(x, y, width, height);
+    fill(#FFFFFF);
+    text(roads.get(road).get().indexOf(this), x + 5, y + 12);
   }
 
   boolean isColided(Enemy enemy) {

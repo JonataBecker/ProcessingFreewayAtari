@@ -70,7 +70,7 @@ class Player {
   }
 
   void moveBack() {
-    y += 50;
+    y += 30;
     if (y > config.height) {
       y = config.height - 17;
     }

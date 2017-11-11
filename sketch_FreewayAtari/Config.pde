@@ -1,6 +1,6 @@
 class Config {
   
-  static final int FINAL_SCORE = 1;
+  static final int FINAL_SCORE = 0;
   static final int FINAL_DIFFICULT = 5;
   final int width;
   final int height;
@@ -11,7 +11,7 @@ class Config {
   Config(int width, int height) {
     this.width = width;
     this.height = height;
-    this.difficult = 1;
+    this.difficult = 5;
     this.score = 0;
   }
 

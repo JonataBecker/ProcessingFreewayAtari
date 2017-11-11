@@ -34,8 +34,8 @@ public void draw() {
 }
 class CarEnemy extends Enemy {
  
-  CarEnemy(int road) {
-    super(road, 2, 30, 20); 
+  CarEnemy(int road, ArrayList<Road> roads) {
+    super(road, roads, 2, 20, 20); 
   }
 
 }
@@ -53,22 +53,20 @@ class Colider {
     return false;
   }
 
-  public boolean isColided(Enemy enemy, Road road) {
+  public int isColided(Enemy enemy, Road road) {
     ArrayList<Enemy> enemies = road.get();
     for (int i = 0; i < enemies.size(); i++) {
       if (enemy.isColided(enemies.get(i)) && enemy != enemies.get(i)) {
-        return true;
+        return enemies.get(i).usedEnergy;
       }
     }
-    return false;
+    return -1;
   }
-
-  
 
 }
 class Config {
   
-  static final int FINAL_SCORE = 1;
+  static final int FINAL_SCORE = 0;
   static final int FINAL_DIFFICULT = 5;
   final int width;
   final int height;
@@ -79,7 +77,7 @@ class Config {
   Config(int width, int height) {
     this.width = width;
     this.height = height;
-    this.difficult = 1;
+    this.difficult = 5;
     this.score = 0;
   }
 
@@ -129,34 +127,173 @@ class Congratulations {
   }
 
 }
+class DifficultFiveGenerator extends DifficultGenerator {
+
+    HashMap<String, Integer> enemies = new HashMap<String, Integer>();
+    
+    DifficultFiveGenerator(ArrayList<Road> roads) {
+        super(roads, 3);
+        enemies.put("car", 20);
+        enemies.put("truck", 50);
+        enemies.put("police", 30);
+    }
+
+    public HashMap<String, Integer> getEnemies() {
+        return enemies;        
+    }
+
+}
+class DifficultFourGenerator extends DifficultGenerator {
+
+    HashMap<String, Integer> enemies = new HashMap<String, Integer>();
+    
+    DifficultFourGenerator(ArrayList<Road> roads) {
+        super(roads, 2);
+        enemies.put("car", 20);
+        enemies.put("truck", 50);
+        enemies.put("police", 30);
+    }
+
+    public HashMap<String, Integer> getEnemies() {
+        return enemies;        
+    }
+
+}
+abstract class DifficultGenerator {
+
+    private ArrayList<Road> roads;
+    private int numCars;
+
+    DifficultGenerator(ArrayList<Road> roads, int numCars) {
+        this.roads = roads;
+        this.numCars = numCars;
+    }
+
+    public abstract HashMap<String, Integer> getEnemies();
+
+    public Enemy getEnemy(Road road) {
+        if (!isGenerateEnemy(road)) {
+            return null;
+        }
+        int rand = (int) random(100);
+        int sum = 0;
+        for (HashMap.Entry<String, Integer> entry : getEnemies().entrySet()) {
+            sum += entry.getValue();
+            if (rand <= sum) {
+                if (entry.getKey().equals("car")) {
+                    return new CarEnemy(road.id, roads);
+                }
+                if (entry.getKey().equals("truck")) {
+                    return new TruckEnemy(road.id, roads);
+                }
+                if (entry.getKey().equals("police")) {
+                    return new PoliceCarEnemy(road.id, roads);
+                }                    
+            }
+        }
+        return null;
+    }
+
+    public boolean isGenerateEnemy(Road road) {
+        if (road.isEmpty()) {
+            return true;
+        }
+        if (road.size() >= numCars) {
+            return false;
+        }
+        if (((int) random(100)) <= numCars) {
+            return true;
+        }
+        return false;
+    }
+
+}
+class DifficultThreeGenerator extends DifficultGenerator {
+
+    HashMap<String, Integer> enemies = new HashMap<String, Integer>();
+    
+    DifficultThreeGenerator(ArrayList<Road> roads) {
+        super(roads, 1);
+        enemies.put("car", 70);
+        enemies.put("truck", 30);
+    }
+
+    public HashMap<String, Integer> getEnemies() {
+        return enemies;        
+    }
+
+}
+class DifficultTwoGenerator extends DifficultGenerator {
+
+    HashMap<String, Integer> enemies = new HashMap<String, Integer>();
+    
+    DifficultTwoGenerator(ArrayList<Road> roads) {
+        super(roads, 1);
+        enemies.put("car", 70);
+        enemies.put("truck", 30);
+    }
+
+    public HashMap<String, Integer> getEnemies() {
+        return enemies;        
+    }
+
+}
+class DifficultOneGenerator extends DifficultGenerator {
+
+    HashMap<String, Integer> enemies = new HashMap<String, Integer>();
+    
+    DifficultOneGenerator(ArrayList<Road> roads) {
+        super(roads, 1);
+        enemies.put("car", 100);
+    }
+
+    public HashMap<String, Integer> getEnemies() {
+        return enemies;        
+    }
+
+}
 abstract class Enemy {
   
   static final int DIRECTION_LEFT = 1;
   static final int DIRECTION_RIGHT = 2;
   
   int road;
+  final ArrayList<Road> roads;
   int width;
   int height;
-  int x = 0;
-  int y = 0;
+  Integer x;
+  Integer y = 0;
   int direction;
-  int enegy = 1;
+  int energy = 1;
+  int usedEnergy = 1;
+  Colider colider = new Colider();
 
-  Enemy(int road, int enegy, int width, int height) {
+  Enemy(int road, ArrayList<Road> roads, int energy, int width, int height) {
+    this.road = road;
     this.direction = DIRECTION_RIGHT;
-    this.enegy = enegy + (int) random(3);
+    this.energy = energy + (int) random(3);
     this.width = width;
     this.height = height;
+    this.roads = roads;
   }
  
   public void move() {
-    x += (direction == DIRECTION_LEFT ? enegy * -1 : enegy);
+    int tmp = x;
+    x += (direction == DIRECTION_LEFT ? 10 * -1 : 10);
+    usedEnergy = energy;
+    int enemyEnergy = colider.isColided(this, roads.get(road));
+    if (enemyEnergy >= 0) {
+      usedEnergy = enemyEnergy;
+    }
+    x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
   }
   
   public void display() {
     noStroke();
     fill(0xfff00f00);
     rect(x, y, width, height);
+    fill(0xffFFFFFF);
+    text(roads.get(road).get().indexOf(this), x + 5, y + 12);
   }
 
   public boolean isColided(Enemy enemy) {
@@ -167,25 +304,45 @@ abstract class Enemy {
   }
 
 }
+class EnemyGenerator {
+
+    final ArrayList<DifficultGenerator> difficults;
+
+    EnemyGenerator(Config config, ArrayList<Road> roads) {
+        this.difficults = new ArrayList<DifficultGenerator>();
+        this.difficults.add(new DifficultOneGenerator(roads));
+        this.difficults.add(new DifficultTwoGenerator(roads));
+        this.difficults.add(new DifficultThreeGenerator(roads));
+        this.difficults.add(new DifficultFourGenerator(roads));
+        this.difficults.add(new DifficultFiveGenerator(roads));
+    }
+
+    public DifficultGenerator getGenerator() {
+        return this.difficults.get(config.getDifficult() - 1);
+    }
+
+    public Enemy getEnemy(Road road) {
+        return getGenerator().getEnemy(road);
+    }
+
+}
 class GameController {
 
   final Player player;
-  final ArrayList<Road> roads;
+  final ArrayList<Road> roads = new ArrayList<Road>();
   final Colider colider = new Colider();
   final Congratulations congratulations = new Congratulations(config);
-    
+  final EnemyGenerator generator = new EnemyGenerator(config, roads);
+  
   GameController() {
     this.player = new Player(config);
-    this.roads = new ArrayList<Road>();
     for (int i = 0; i < 10; i++) {
       Road road = new LeftRoad(i, config);
       if (i >= 5) {
         road = new RightRoad(i,  config);
       }
-      road.generate();      
       this.roads.add(road);      
     }
-    roads.get(0).add(new PoliceCarEnemy(0, roads));
   }
   
   public void keyPressed(int keyCode) {
@@ -201,6 +358,10 @@ class GameController {
   
   public void display() {
     for (int i = 0; i < roads.size(); i++) {
+      Enemy enemy = generator.getEnemy(roads.get(i));
+      if (enemy != null) {
+        roads.get(i).add(enemy);
+      }
       roads.get(i).display();     
     }
     if (colider.isColided(player, roads)) {
@@ -220,7 +381,7 @@ class LeftRoad extends Road {
   }
   
   public void add(Enemy enemy) {
-    if (enemy.x == 0) {
+    if (enemy.x == null) {
       enemy.x = config.width;
     }
     enemy.y = calcY(enemy);
@@ -301,7 +462,7 @@ class Player {
   }
 
   public void moveBack() {
-    y += 50;
+    y += 30;
     if (y > config.height) {
       y = config.height - 17;
     }
@@ -323,28 +484,34 @@ class Player {
 
 }
 class PoliceCarEnemy extends Enemy {
- 
-  final ArrayList<Road> roads;
-
-  Colider colider = new Colider();
 
   PoliceCarEnemy(int road, ArrayList<Road> roads) {
-    super(road, 5, 30, 20); 
-    this.roads = roads;
+    super(road, roads, 3, 30, 20); 
   }
 
   public void move() {
-    x += (direction == DIRECTION_LEFT ? enegy * -1 : enegy);
-    if (colider.isColided(this, roads.get(road))) {
+    int tmp = x;
+    x += (direction == DIRECTION_LEFT ? 20 * -1 : 20);
+    usedEnergy = energy;
+    int enemyEnergy = colider.isColided(this, roads.get(road));
+    if (enemyEnergy >= 0) {
+      usedEnergy = enemyEnergy;
+      int maxRoad = (direction == DIRECTION_LEFT ? 5 : 10);
+      if (road + 1 == maxRoad) {
+        x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
+        return;
+      }
       roads.get(road).remove(this);
       road++;
       roads.get(road).add(this);
-      if (colider.isColided(this, roads.get(road))) {
+      if (colider.isColided(this, roads.get(road)) >= 0) {
         roads.get(road).remove(this);
         road--;
+        x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
         roads.get(road).add(this);
-        x += (direction == DIRECTION_LEFT ? enegy * -1 : enegy) * -1;
+        return;
       }
+      x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
     }
   }
 
@@ -352,6 +519,8 @@ class PoliceCarEnemy extends Enemy {
     noStroke();
     fill(0xff0366d6);
     rect(x, y, width, height);
+    fill(0xffFFFFFF);
+    text(roads.get(road).get().indexOf(this), x + 5, y + 12);
   }
 
 }
@@ -362,6 +531,9 @@ class RightRoad extends Road {
   }
 
   public void add(Enemy enemy) {
+    if (enemy.x == null) {
+      enemy.x = enemy.width * -1;
+    }
     enemy.y = calcY(enemy);
     enemy.direction = Enemy.DIRECTION_RIGHT;
     addEnemy(enemy);
@@ -374,7 +546,8 @@ abstract class Road {
   final int id;
   final Config config;
   final ArrayList<Enemy> enemies;
-  
+  Colider colider = new Colider();
+
   Road(int id, Config config) {
     this.id = id;
     this.config = config;
@@ -382,7 +555,12 @@ abstract class Road {
   }
 
   protected void addEnemy(Enemy enemy) {
-     this.enemies.add(enemy);
+    int tmp = enemy.x;
+    enemy.x += (enemy.direction == Enemy.DIRECTION_LEFT ? 10 * -1 : 10);
+    if (colider.isColided(enemy, this) == -1) {
+      enemy.x = tmp;
+      this.enemies.add(enemy);
+    }
   }
 
   protected int calcY(Enemy enemy) {
@@ -401,11 +579,11 @@ abstract class Road {
     return this.enemies.size();
   }
 
-  protected abstract void add(Enemy enemy);
-
-  public void generate() {
-    add(new CarEnemy(id));
+  public boolean isEmpty() {
+    return this.enemies.isEmpty();
   }
+
+  protected abstract void add(Enemy enemy);
 
   public void display() {
     for (Enemy enemy : get()) {
@@ -413,11 +591,8 @@ abstract class Road {
         enemy.move();  
       }
       enemy.display();
-      if (enemy.x < 0 || enemy.x > config.width) {
+      if (enemy.x < (enemy.width * -1) || enemy.x > config.width) {
         remove(enemy);
-        if (!(enemy instanceof PoliceCarEnemy)) {
-          generate();
-        }
       }
     }  
   }
@@ -498,8 +673,16 @@ class Score {
 }
 class TruckEnemy extends Enemy {
  
-  TruckEnemy(int road) {
-    super(road, 2, 80, 30); 
+  TruckEnemy(int road, ArrayList<Road> roads) {
+    super(road, roads, 2, 80, 30); 
+  }
+
+  public void display() {
+    noStroke();
+    fill(0xff000000);
+    rect(x, y, width, height);
+    fill(0xffFFFFFF);
+    text(roads.get(road).get().indexOf(this), x + 5, y + 12);    
   }
 
 }

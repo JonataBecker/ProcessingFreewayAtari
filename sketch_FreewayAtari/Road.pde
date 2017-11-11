@@ -3,7 +3,8 @@ abstract class Road {
   final int id;
   final Config config;
   final ArrayList<Enemy> enemies;
-  
+  Colider colider = new Colider();
+
   Road(int id, Config config) {
     this.id = id;
     this.config = config;
@@ -11,7 +12,12 @@ abstract class Road {
   }
 
   protected void addEnemy(Enemy enemy) {
-     this.enemies.add(enemy);
+    int tmp = enemy.x;
+    enemy.x += (enemy.direction == Enemy.DIRECTION_LEFT ? 10 * -1 : 10);
+    if (colider.isColided(enemy, this) == -1) {
+      enemy.x = tmp;
+      this.enemies.add(enemy);
+    }
   }
 
   protected int calcY(Enemy enemy) {
@@ -30,11 +36,11 @@ abstract class Road {
     return this.enemies.size();
   }
 
-  protected abstract void add(Enemy enemy);
-
-  void generate() {
-    add(new CarEnemy(id));
+  boolean isEmpty() {
+    return this.enemies.isEmpty();
   }
+
+  protected abstract void add(Enemy enemy);
 
   void display() {
     for (Enemy enemy : get()) {
@@ -42,11 +48,8 @@ abstract class Road {
         enemy.move();  
       }
       enemy.display();
-      if (enemy.x < 0 || enemy.x > config.width) {
+      if (enemy.x < (enemy.width * -1) || enemy.x > config.width) {
         remove(enemy);
-        if (!(enemy instanceof PoliceCarEnemy)) {
-          generate();
-        }
       }
     }  
   }

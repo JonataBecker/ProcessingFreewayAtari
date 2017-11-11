@@ -1,22 +1,20 @@
 class GameController {
 
   final Player player;
-  final ArrayList<Road> roads;
+  final ArrayList<Road> roads = new ArrayList<Road>();
   final Colider colider = new Colider();
   final Congratulations congratulations = new Congratulations(config);
-    
+  final EnemyGenerator generator = new EnemyGenerator(config, roads);
+  
   GameController() {
     this.player = new Player(config);
-    this.roads = new ArrayList<Road>();
     for (int i = 0; i < 10; i++) {
       Road road = new LeftRoad(i, config);
       if (i >= 5) {
         road = new RightRoad(i,  config);
       }
-      road.generate();      
       this.roads.add(road);      
     }
-    roads.get(0).add(new PoliceCarEnemy(0, roads));
   }
   
   void keyPressed(int keyCode) {
@@ -32,6 +30,10 @@ class GameController {
   
   void display() {
     for (int i = 0; i < roads.size(); i++) {
+      Enemy enemy = generator.getEnemy(roads.get(i));
+      if (enemy != null) {
+        roads.get(i).add(enemy);
+      }
       roads.get(i).display();     
     }
     if (colider.isColided(player, roads)) {

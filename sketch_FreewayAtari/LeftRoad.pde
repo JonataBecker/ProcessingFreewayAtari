@@ -5,7 +5,7 @@ class LeftRoad extends Road {
   }
   
   void add(Enemy enemy) {
-    if (enemy.x == 0) {
+    if (enemy.x == null) {
       enemy.x = config.width;
     }
     enemy.y = calcY(enemy);
