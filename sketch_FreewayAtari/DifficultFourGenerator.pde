@@ -3,10 +3,10 @@ class DifficultFourGenerator extends DifficultGenerator {
     HashMap<String, Integer> enemies = new HashMap<String, Integer>();
     
     DifficultFourGenerator(ArrayList<Road> roads) {
-        super(roads, 2);
-        enemies.put("car", 20);
-        enemies.put("truck", 50);
-        enemies.put("police", 30);
+        super(roads, 1.1);
+        enemies.put("car", 50);
+        enemies.put("truck", 30);
+        enemies.put("police", 20);
     }
 
     HashMap<String, Integer> getEnemies() {

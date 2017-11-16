@@ -147,9 +147,9 @@ class DifficultFiveGenerator extends DifficultGenerator {
     HashMap<String, Integer> enemies = new HashMap<String, Integer>();
     
     DifficultFiveGenerator(ArrayList<Road> roads) {
-        super(roads, 3);
-        enemies.put("car", 20);
-        enemies.put("truck", 50);
+        super(roads, 1.3f);
+        enemies.put("car", 30);
+        enemies.put("truck", 40);
         enemies.put("police", 30);
     }
 
@@ -163,10 +163,10 @@ class DifficultFourGenerator extends DifficultGenerator {
     HashMap<String, Integer> enemies = new HashMap<String, Integer>();
     
     DifficultFourGenerator(ArrayList<Road> roads) {
-        super(roads, 2);
-        enemies.put("car", 20);
-        enemies.put("truck", 50);
-        enemies.put("police", 30);
+        super(roads, 1.1f);
+        enemies.put("car", 50);
+        enemies.put("truck", 30);
+        enemies.put("police", 20);
     }
 
     public HashMap<String, Integer> getEnemies() {
@@ -177,9 +177,9 @@ class DifficultFourGenerator extends DifficultGenerator {
 abstract class DifficultGenerator {
 
     private ArrayList<Road> roads;
-    private int numCars;
+    private float numCars;
 
-    DifficultGenerator(ArrayList<Road> roads, int numCars) {
+    DifficultGenerator(ArrayList<Road> roads, float numCars) {
         this.roads = roads;
         this.numCars = numCars;
     }
@@ -216,7 +216,7 @@ abstract class DifficultGenerator {
         if (road.size() >= numCars) {
             return false;
         }
-        if (((int) random(100)) <= numCars) {
+        if (random(100) <= numCars) {
             return true;
         }
         return false;
@@ -228,9 +228,10 @@ class DifficultThreeGenerator extends DifficultGenerator {
     HashMap<String, Integer> enemies = new HashMap<String, Integer>();
     
     DifficultThreeGenerator(ArrayList<Road> roads) {
-        super(roads, 3);
-        enemies.put("car", 70);
-        enemies.put("truck", 30);
+        super(roads, 1.8f);
+        enemies.put("car", 40);
+        enemies.put("truck", 40);
+        enemies.put("police", 20);
     }
 
     public HashMap<String, Integer> getEnemies() {
@@ -587,7 +588,7 @@ class Player {
 class PoliceCarEnemy extends Enemy {
 
   PoliceCarEnemy(int road, ArrayList<Road> roads) {
-    super(road, roads, 5, 40, 20); 
+    super(road, roads, 4, 40, 20); 
   }
 
   public void move() {

@@ -1,9 +1,9 @@
 abstract class DifficultGenerator {
 
     private ArrayList<Road> roads;
-    private int numCars;
+    private float numCars;
 
-    DifficultGenerator(ArrayList<Road> roads, int numCars) {
+    DifficultGenerator(ArrayList<Road> roads, float numCars) {
         this.roads = roads;
         this.numCars = numCars;
     }
@@ -40,7 +40,7 @@ abstract class DifficultGenerator {
         if (road.size() >= numCars) {
             return false;
         }
-        if (((int) random(100)) <= numCars) {
+        if (random(100) <= numCars) {
             return true;
         }
         return false;
