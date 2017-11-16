@@ -11,7 +11,7 @@ class Config {
   Config(int width, int height) {
     this.width = width;
     this.height = height;
-    this.difficult = 5;
+    this.difficult = 1;
     this.score = 0;
   }
 

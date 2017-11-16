@@ -1,7 +1,7 @@
 class PoliceCarEnemy extends Enemy {
 
   PoliceCarEnemy(int road, ArrayList<Road> roads) {
-    super(road, roads, 3, 30, 20); 
+    super(road, roads, 5, 40, 20); 
   }
 
   void move() {
@@ -25,17 +25,13 @@ class PoliceCarEnemy extends Enemy {
         x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
         roads.get(road).add(this);
         return;
-      }
-      x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
+      } 
     }
+    x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
   }
 
-  void display() {
-    noStroke();
-    fill(#0366d6);
-    rect(x, y, width, height);
-    fill(#FFFFFF);
-    text(roads.get(road).get().indexOf(this), x + 5, y + 12);
+  PImage getImage() {
+    return images.getPoliceCar();
   }
 
 }

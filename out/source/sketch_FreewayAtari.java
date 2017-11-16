@@ -15,17 +15,29 @@ import java.io.IOException;
 public class sketch_FreewayAtari extends PApplet {
 
 
-Config config = new Config(800, 480);
-Scene scene = new Scene(config);
-GameController gameController = new GameController();
+Images images = new Images();
+Config config;
+Scene scene;
+GameController gameController;
 
 public void setup() {  
   
   noStroke();
+  start();
 }
 
 public void keyPressed() {
+  if (keyCode == 116) {
+    start();
+    return;
+  }
   gameController.keyPressed(keyCode);   
+}
+
+public void start() {
+    config = new Config(800, 480);
+    scene = new Scene(config);
+    gameController = new GameController();
 }
 
 public void draw() { 
@@ -35,9 +47,12 @@ public void draw() {
 class CarEnemy extends Enemy {
  
   CarEnemy(int road, ArrayList<Road> roads) {
-    super(road, roads, 2, 20, 20); 
+    super(road, roads, 2, 30, 20); 
   }
 
+  public PImage getImage() {
+    return images.getCar();
+  }
 }
 class Colider {
 
@@ -77,7 +92,7 @@ class Config {
   Config(int width, int height) {
     this.width = width;
     this.height = height;
-    this.difficult = 5;
+    this.difficult = 1;
     this.score = 0;
   }
 
@@ -213,7 +228,7 @@ class DifficultThreeGenerator extends DifficultGenerator {
     HashMap<String, Integer> enemies = new HashMap<String, Integer>();
     
     DifficultThreeGenerator(ArrayList<Road> roads) {
-        super(roads, 1);
+        super(roads, 3);
         enemies.put("car", 70);
         enemies.put("truck", 30);
     }
@@ -282,25 +297,39 @@ abstract class Enemy {
     x += (direction == DIRECTION_LEFT ? 10 * -1 : 10);
     usedEnergy = energy;
     int enemyEnergy = colider.isColided(this, roads.get(road));
-    if (enemyEnergy >= 0) {
+    if (enemyEnergy >= 0 && energy > enemyEnergy) {
       usedEnergy = enemyEnergy;
     }
     x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
   }
   
   public void display() {
-    noStroke();
-    fill(0xfff00f00);
-    rect(x, y, width, height);
-    fill(0xffFFFFFF);
-    text(roads.get(road).get().indexOf(this), x + 5, y + 12);
+    pushMatrix();
+    if (direction == DIRECTION_RIGHT) {
+      translate(x + width, y + height);
+      rotate(PI);
+    } else {
+      translate(x, y);
+    }
+    image(getImage(), 0, 0, width, height);
+    popMatrix();
+  }
+
+  public PImage getImage() {
+    return null;
   }
 
   public boolean isColided(Enemy enemy) {
-    return ((x >= enemy.x && x <= enemy.x + enemy.width) ||
-          (x + width >= enemy.x && x + width <= enemy.x + enemy.width)) && 
-          ((y >= enemy.y && y <= enemy.y + enemy.height) ||
-          (y + height >= enemy.y && y + height <= enemy.y + enemy.height)); 
+    return (
+            (x >= enemy.x && x <= enemy.x + enemy.width) ||
+            (x + width >= enemy.x && x + width <= enemy.x + enemy.width) ||
+            (x <= enemy.x && x + width >= enemy.x + enemy.width) 
+          ) && 
+          (
+            (y >= enemy.y && y <= enemy.y + enemy.height) ||
+            (y + height >= enemy.y && y + height <= enemy.y + enemy.height) ||
+            (y <= enemy.y && y + height >= enemy.y + enemy.height)
+          ); 
   }
 
 }
@@ -374,6 +403,42 @@ class GameController {
   }
 
 }
+class Images {
+    
+    PImage car;
+    PImage truck;
+    PImage policeCar;
+    PImage player;
+
+    public PImage getCar() {
+        if (car == null) {
+            this.car = loadImage("img/Taxi-GTA2.png");
+        }
+        return car;
+    }
+    
+    public PImage getTruck() {
+        if (truck == null) {
+            this.truck = loadImage("img/FireTruck-GTA2.png");
+        }
+        return truck;
+    }
+
+    public PImage getPoliceCar() {
+        if (policeCar == null) {
+            this.policeCar = loadImage("img/SquadCar-GTA1-LibertyCity.png");
+        }
+        return policeCar;
+    }
+
+    public PImage getPlayer() {
+        if (player == null) {
+            this.player = loadImage("img/chicken.png");
+        }
+        return player;
+    }
+
+}
 class LeftRoad extends Road {
 
   LeftRoad(int id, Config config) {
@@ -396,25 +461,35 @@ class Player {
   static final int STATUS_MOVE = 1;
   static final int STATUS_FINAL_SW = 2;
   
+  static final int POS_DOWN = 0;
+  static final int POS_LEFT = 1;
+  static final int POS_RIGHT = 2;
+  static final int POS_UP = 3;
+
+  static final int SIZE_IMG = 49;
+
   final Config config;
   int xSpeed = 10;
   int ySpeed = 10;
-  int widthPlayer = 10;
-  int heightPlayer = 10;
+  int widthPlayer = 30;
+  int heightPlayer = 30;
   int status = STATUS_MOVE;
   int y;
   int x;
   int oldMills;
+  int count;
+  int pos;
   
   Player(Config config) {
     this.config = config;
     initialPosition();
+    pos = POS_UP;
   }
 
   public void initialPosition() {
     this.status = STATUS_MOVE;
     this.x = (config.width / 2) - (widthPlayer / 2);
-    this.y = config.height - 17;
+    this.y = config.height - 28;
   }
 
   public void move(int keyCode) {
@@ -428,6 +503,10 @@ class Player {
     }
     oldMills = m;
     if (keyCode == UP) {
+      if (pos != POS_UP) {
+        pos = POS_UP;
+        count = -1;
+      }
       y-=ySpeed;
       if (y <= 40) {
         y += 7;
@@ -435,36 +514,58 @@ class Player {
       }
     }
     if (keyCode == DOWN) {
+      if (pos != POS_DOWN) {
+        pos = POS_DOWN;
+        count = -1;
+      }      
       int tmpY = y + ySpeed; 
       if (tmpY < config.height - 30) {
         y = tmpY;
       }
     }
     if (keyCode == LEFT) {
+      if (pos != POS_LEFT) {
+        pos = POS_LEFT;
+        count = -1;
+      }      
       x-=xSpeed;
       if (x < 0) {
         x = 0;
       }
     }
     if (keyCode == RIGHT) {
+      if (pos != POS_RIGHT) {
+        pos = POS_RIGHT;
+        count = -1;
+      }            
       x+=xSpeed;
       if (x > config.width - widthPlayer) {
         x = config.width - widthPlayer;
       }
     }
+    count++;
+    if (count >= 3) {
+      count = 0;
+    }
   }
   
   public boolean isColided(Enemy enemy) {
-    return ((x >= enemy.x && x <= enemy.x + enemy.width) ||
-          (x + widthPlayer >= enemy.x && x + widthPlayer <= enemy.x + enemy.width)) && 
-          ((y >= enemy.y && y <= enemy.y + enemy.height) ||
-          (y + heightPlayer >= enemy.y && y + heightPlayer <= enemy.y + enemy.height)); 
+    return (
+            (x >= enemy.x && x <= enemy.x + enemy.width) ||
+            (x + widthPlayer >= enemy.x && x + widthPlayer <= enemy.x + enemy.width) ||
+            (x <= enemy.x && x + widthPlayer >= enemy.x + enemy.width)
+          ) && 
+          (
+            (y >= enemy.y && y <= enemy.y + enemy.height) ||
+            (y + heightPlayer >= enemy.y && y + heightPlayer <= enemy.y + enemy.height) ||
+            (y <= enemy.y && y + heightPlayer >= enemy.y + enemy.height)
+          ); 
   }
 
   public void moveBack() {
-    y += 30;
+    y += 20;
     if (y > config.height) {
-      y = config.height - 17;
+      y = config.height - 28;
     }
   }
 
@@ -477,16 +578,16 @@ class Player {
   }
 
   public void display() {
-    noStroke();
-    fill(0xfff00f00);
-    rect(x, y, widthPlayer, heightPlayer);
+    int pX = SIZE_IMG * count;
+    int pY = SIZE_IMG * pos;
+    copy(images.getPlayer(), pX, pY, SIZE_IMG, SIZE_IMG, x, y, widthPlayer, heightPlayer);
   }
 
 }
 class PoliceCarEnemy extends Enemy {
 
   PoliceCarEnemy(int road, ArrayList<Road> roads) {
-    super(road, roads, 3, 30, 20); 
+    super(road, roads, 5, 40, 20); 
   }
 
   public void move() {
@@ -510,17 +611,13 @@ class PoliceCarEnemy extends Enemy {
         x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
         roads.get(road).add(this);
         return;
-      }
-      x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
+      } 
     }
+    x = tmp + (direction == DIRECTION_LEFT ? usedEnergy * -1 : usedEnergy);
   }
 
-  public void display() {
-    noStroke();
-    fill(0xff0366d6);
-    rect(x, y, width, height);
-    fill(0xffFFFFFF);
-    text(roads.get(road).get().indexOf(this), x + 5, y + 12);
+  public PImage getImage() {
+    return images.getPoliceCar();
   }
 
 }
@@ -674,17 +771,12 @@ class Score {
 class TruckEnemy extends Enemy {
  
   TruckEnemy(int road, ArrayList<Road> roads) {
-    super(road, roads, 2, 80, 30); 
+    super(road, roads, 2, 100, 30); 
   }
 
-  public void display() {
-    noStroke();
-    fill(0xff000000);
-    rect(x, y, width, height);
-    fill(0xffFFFFFF);
-    text(roads.get(road).get().indexOf(this), x + 5, y + 12);    
+  public PImage getImage() {
+    return images.getTruck();
   }
-
 }
   public void settings() {  size(800,480); }
   static public void main(String[] passedArgs) {
