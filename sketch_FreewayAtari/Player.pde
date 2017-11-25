@@ -22,7 +22,7 @@ class Player {
   int oldMills;
   int count;
   int pos;
-  
+
   Player(Config config) {
     this.config = config;
     initialPosition();
@@ -62,7 +62,7 @@ class Player {
         count = -1;
       }      
       int tmpY = y + ySpeed; 
-      if (tmpY < config.height - 30) {
+      if (tmpY < config.height - 18) {
         y = tmpY;
       }
     }
@@ -106,7 +106,7 @@ class Player {
   }
 
   void moveBack() {
-    y += 20;
+    y += 50;
     if (y > config.height) {
       y = config.height - 28;
     }

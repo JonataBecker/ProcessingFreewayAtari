@@ -1,7 +1,7 @@
 class PoliceCarEnemy extends Enemy {
 
   PoliceCarEnemy(int road, ArrayList<Road> roads) {
-    super(road, roads, 4, 40, 20); 
+    super(road, roads, 2, 40, 20); 
   }
 
   void move() {

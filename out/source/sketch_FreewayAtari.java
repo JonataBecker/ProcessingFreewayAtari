@@ -47,7 +47,7 @@ public void draw() {
 class CarEnemy extends Enemy {
  
   CarEnemy(int road, ArrayList<Road> roads) {
-    super(road, roads, 2, 30, 20); 
+    super(road, roads, 1, 30, 20); 
   }
 
   public PImage getImage() {
@@ -88,12 +88,18 @@ class Config {
   int difficult;
   int score;
   boolean win = false;
+  int live;
 
   Config(int width, int height) {
     this.width = width;
     this.height = height;
     this.difficult = 1;
     this.score = 0;
+    resetLive();
+  }
+
+  public void resetLive() {
+    live = 5;
   }
 
   public void addScore() {
@@ -104,6 +110,7 @@ class Config {
         win = true;
       } else {
         this.difficult++;
+        resetLive();
       }
     }
   }
@@ -120,6 +127,17 @@ class Config {
     return win;
   }
 
+  public void die() {
+    live--;
+  }
+
+  public boolean isDead() {
+    return live < 0;
+  }
+
+  public boolean isFinished() {
+    return win || isDead();
+  }
 }
 class Congratulations {
   
@@ -138,7 +156,17 @@ class Congratulations {
     int y = config.height / 2 - height / 2;
     rect(x, y, width, height);
     fill(0xffFFFFFF);
-    text("Voc\u00ea venceu!!!", x + 30, y + 45);
+    text("Voc\u00ea venceu!", x + 30, y + 45);
+  }
+
+  public void displayLost() {
+    noStroke();
+    fill(0xff000000);
+    int x = config.width / 2 - width / 2;
+    int y = config.height / 2 - height / 2;
+    rect(x, y, width, height);
+    fill(0xffFFFFFF);
+    text("Voc\u00ea perdeu!", x + 30, y + 45);
   }
 
 }
@@ -147,7 +175,7 @@ class DifficultFiveGenerator extends DifficultGenerator {
     HashMap<String, Integer> enemies = new HashMap<String, Integer>();
     
     DifficultFiveGenerator(ArrayList<Road> roads) {
-        super(roads, 1.3f);
+        super(roads, 2);
         enemies.put("car", 30);
         enemies.put("truck", 40);
         enemies.put("police", 30);
@@ -163,7 +191,7 @@ class DifficultFourGenerator extends DifficultGenerator {
     HashMap<String, Integer> enemies = new HashMap<String, Integer>();
     
     DifficultFourGenerator(ArrayList<Road> roads) {
-        super(roads, 1.1f);
+        super(roads, 2);
         enemies.put("car", 50);
         enemies.put("truck", 30);
         enemies.put("police", 20);
@@ -228,7 +256,7 @@ class DifficultThreeGenerator extends DifficultGenerator {
     HashMap<String, Integer> enemies = new HashMap<String, Integer>();
     
     DifficultThreeGenerator(ArrayList<Road> roads) {
-        super(roads, 1.8f);
+        super(roads, 2);
         enemies.put("car", 40);
         enemies.put("truck", 40);
         enemies.put("police", 20);
@@ -376,7 +404,7 @@ class GameController {
   }
   
   public void keyPressed(int keyCode) {
-    if (config.isWin()) {
+    if (config.isFinished()) {
       return;
     }
     player.move(keyCode);
@@ -396,10 +424,14 @@ class GameController {
     }
     if (colider.isColided(player, roads)) {
       player.moveBack();
+      config.die();
     }
     player.display();
     if (config.isWin()) {
       congratulations.display();
+    }
+    if (config.isDead()) {
+      congratulations.displayLost();
     }
   }
 
@@ -480,7 +512,7 @@ class Player {
   int oldMills;
   int count;
   int pos;
-  
+
   Player(Config config) {
     this.config = config;
     initialPosition();
@@ -520,7 +552,7 @@ class Player {
         count = -1;
       }      
       int tmpY = y + ySpeed; 
-      if (tmpY < config.height - 30) {
+      if (tmpY < config.height - 18) {
         y = tmpY;
       }
     }
@@ -564,7 +596,7 @@ class Player {
   }
 
   public void moveBack() {
-    y += 20;
+    y += 50;
     if (y > config.height) {
       y = config.height - 28;
     }
@@ -588,7 +620,7 @@ class Player {
 class PoliceCarEnemy extends Enemy {
 
   PoliceCarEnemy(int road, ArrayList<Road> roads) {
-    super(road, roads, 4, 40, 20); 
+    super(road, roads, 2, 40, 20); 
   }
 
   public void move() {
@@ -685,7 +717,7 @@ abstract class Road {
 
   public void display() {
     for (Enemy enemy : get()) {
-      if (!config.isWin()) {
+      if (!config.isFinished()) {
         enemy.move();  
       }
       enemy.display();
@@ -764,7 +796,7 @@ class Score {
   
   public void display() {
     fill(0xff000000);
-    text("Score: " + config.score, 10, 20);
+    text("Live: " + (config.live < 0 ? "0" : config.live), 10, 20);
     text("Difficult: " + config.difficult, config.width - 80, 20);
   }
 
@@ -772,7 +804,7 @@ class Score {
 class TruckEnemy extends Enemy {
  
   TruckEnemy(int road, ArrayList<Road> roads) {
-    super(road, roads, 2, 100, 30); 
+    super(road, roads, 1, 100, 30); 
   }
 
   public PImage getImage() {

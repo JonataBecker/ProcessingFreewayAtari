@@ -44,7 +44,7 @@ abstract class Road {
 
   void display() {
     for (Enemy enemy : get()) {
-      if (!config.isWin()) {
+      if (!config.isFinished()) {
         enemy.move();  
       }
       enemy.display();

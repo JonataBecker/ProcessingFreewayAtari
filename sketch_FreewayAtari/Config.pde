@@ -7,12 +7,18 @@ class Config {
   int difficult;
   int score;
   boolean win = false;
+  int live;
 
   Config(int width, int height) {
     this.width = width;
     this.height = height;
     this.difficult = 1;
     this.score = 0;
+    resetLive();
+  }
+
+  void resetLive() {
+    live = 5;
   }
 
   void addScore() {
@@ -23,6 +29,7 @@ class Config {
         win = true;
       } else {
         this.difficult++;
+        resetLive();
       }
     }
   }
@@ -39,4 +46,15 @@ class Config {
     return win;
   }
 
+  void die() {
+    live--;
+  }
+
+  boolean isDead() {
+    return live < 0;
+  }
+
+  boolean isFinished() {
+    return win || isDead();
+  }
 }

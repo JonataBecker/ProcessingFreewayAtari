@@ -18,7 +18,7 @@ class GameController {
   }
   
   void keyPressed(int keyCode) {
-    if (config.isWin()) {
+    if (config.isFinished()) {
       return;
     }
     player.move(keyCode);
@@ -38,10 +38,14 @@ class GameController {
     }
     if (colider.isColided(player, roads)) {
       player.moveBack();
+      config.die();
     }
     player.display();
     if (config.isWin()) {
       congratulations.display();
+    }
+    if (config.isDead()) {
+      congratulations.displayLost();
     }
   }
 

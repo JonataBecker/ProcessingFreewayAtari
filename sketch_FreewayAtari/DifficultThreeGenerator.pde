@@ -3,7 +3,7 @@ class DifficultThreeGenerator extends DifficultGenerator {
     HashMap<String, Integer> enemies = new HashMap<String, Integer>();
     
     DifficultThreeGenerator(ArrayList<Road> roads) {
-        super(roads, 1.8);
+        super(roads, 2);
         enemies.put("car", 40);
         enemies.put("truck", 40);
         enemies.put("police", 20);
